@@ -1,0 +1,111 @@
+{
+  "name": "underleaf",
+  "version": "0.1.0",
+  "description": "A beautiful local LaTeX editor with live preview",
+  "type": "module",
+  "main": "dist-electron/electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && node build-electron.js",
+    "build:electron": "node build-electron.js",
+    "electron:dev": "concurrently \"vite --port 5173\" \"wait-on http://localhost:5173 && node electron-dev.js\"",
+    "electron:build": "npm run build && electron-builder",
+    "preview": "vite preview",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "build:installer": "npm run build && electron-forge make"
+  },
+  "keywords": [
+    "latex",
+    "editor",
+    "pdf"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "lucide-react": "^0.446.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-resizable-panels": "^2.1.4",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.9.0",
+    "@electron-forge/maker-deb": "^7.9.0",
+    "@electron-forge/maker-dmg": "^7.9.0",
+    "@electron-forge/maker-rpm": "^7.9.0",
+    "@electron-forge/maker-squirrel": "^7.9.0",
+    "@electron-forge/maker-zip": "^7.9.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.9.0",
+    "@electron-forge/plugin-fuses": "^7.9.0",
+    "@electron/fuses": "^1.8.0",
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.0.1",
+    "cross-env": "^10.1.0",
+    "electron": "^32.1.2",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.underleaf.editor",
+    "productName": "Underleaf",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "dist-electron/electron/main.cjs"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "dir",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    }
+  }
+}
