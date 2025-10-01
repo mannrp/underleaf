@@ -1,8 +1,20 @@
-import { FolderOpen, Save, Play } from 'lucide-react'
+import { FolderOpen, Save, Play, Zap, ZapOff } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
 
 export function Toolbar() {
-  const { filePath, content, isCompiling, setContent, setFilePath, setPdfPath, setIsCompiling, setCompilationResult } = useEditorStore()
+  const { 
+    filePath, 
+    content, 
+    isCompiling, 
+    autoCompileEnabled,
+    setContent, 
+    setFilePath, 
+    setPdfPath, 
+    setIsCompiling, 
+    setCompilationResult,
+    setAutoCompileEnabled,
+    updatePdfTime
+  } = useEditorStore()
   
   const handleOpen = async () => {
     const result = await window.electron.fileOpen()
@@ -37,6 +49,7 @@ export function Toolbar() {
       
       if (result.success && result.pdfPath) {
         setPdfPath(result.pdfPath)
+        updatePdfTime() // Force PDF refresh
         console.log('Compilation successful:', result.pdfPath)
       } else {
         console.error('Compilation failed:', result.output)
@@ -69,6 +82,19 @@ export function Toolbar() {
       >
         <Play size={16} />
         {isCompiling ? 'Compiling...' : 'Compile'}
+      </button>
+      <div className="w-px h-6 bg-gray-700 mx-2" />
+      <button 
+        onClick={() => setAutoCompileEnabled(!autoCompileEnabled)}
+        className={`px-3 py-1.5 rounded flex items-center gap-2 text-white ${
+          autoCompileEnabled 
+            ? 'bg-green-600 hover:bg-green-500' 
+            : 'bg-gray-700 hover:bg-gray-600'
+        }`}
+        title={autoCompileEnabled ? 'Disable auto-compile' : 'Enable auto-compile'}
+      >
+        {autoCompileEnabled ? <Zap size={16} /> : <ZapOff size={16} />}
+        Auto
       </button>
       <div className="flex-1" />
       <span className="text-sm text-gray-400">

@@ -4,11 +4,13 @@ A local LaTeX editor with live PDF preview. Built with Electron, React, and Type
 
 ## Features
 
-- Live PDF preview with real-time compilation
-- Monaco Editor (VS Code editor)
-- Resizable split panes
+- **Auto-compile**: Automatically compiles LaTeX as you type (2-second delay)
+- **Live PDF preview** with real-time compilation
+- **Monaco Editor** (VS Code editor) with LaTeX syntax highlighting
+- **Resizable split panes** for optimal workflow
+- **Manual compile** option with compile button
 - Cross-platform support
-- Dark theme
+- Dark theme optimized for long editing sessions
 
 ## Prerequisites
 
@@ -48,10 +50,20 @@ npm run electron:build  # Package for distribution
 - Tailwind CSS
 - Vite
 
+## Usage
+
+1. **Open/Create**: Click "Open" to load a .tex file or start typing in the editor
+2. **Auto-compile**: Toggle the "Auto" button (⚡) to enable/disable automatic compilation
+3. **Manual compile**: Click "Compile" button to manually compile your document
+4. **Save**: Click "Save" to save your work (auto-compile requires saved files)
+
+The auto-compile feature will automatically save and compile your document 2 seconds after you stop typing, keeping the PDF preview always up-to-date.
+
 ## Troubleshooting
 
 **Compilation fails**: Ensure LaTeX is installed and `pdflatex` is in PATH
 **PDF not showing**: Check compilation succeeded and PDF exists
+**Auto-compile not working**: Make sure file is saved first (has a file path)
 **App won't start**: Use Node.js 18+, try `rm -rf node_modules && npm install`
 
 ## License
