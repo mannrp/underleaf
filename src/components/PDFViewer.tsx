@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
 
 export function PDFViewer() {
-  const { pdfPath } = useEditorStore()
+  const { pdfPath, pdfUpdateTime } = useEditorStore()
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -18,9 +18,12 @@ export function PDFViewer() {
       setLoading(true)
       setError(null)
       try {
+        console.log('Loading PDF:', pdfPath, 'Update time:', pdfUpdateTime)
         const base64Data = await window.electron.pdfRead(pdfPath)
-        const dataUrl = `data:application/pdf;base64,${base64Data}`
+        // Add timestamp to force refresh
+        const dataUrl = `data:application/pdf;base64,${base64Data}#${pdfUpdateTime}`
         setPdfDataUrl(dataUrl)
+        console.log('PDF loaded successfully')
       } catch (err) {
         console.error('Error loading PDF:', err)
         setError('Failed to load PDF. Make sure the file exists and compilation was successful.')
@@ -31,7 +34,7 @@ export function PDFViewer() {
     }
 
     loadPdf()
-  }, [pdfPath])
+  }, [pdfPath, pdfUpdateTime])
   
   if (!pdfPath) {
     return (
@@ -79,6 +82,7 @@ export function PDFViewer() {
   return (
     <div className="h-full bg-gray-900">
       <iframe
+        key={pdfUpdateTime} // Force re-render when PDF updates
         src={pdfDataUrl}
         className="w-full h-full border-0"
         title="PDF Preview"

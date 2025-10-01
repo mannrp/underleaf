@@ -2,8 +2,13 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Toolbar } from '@/components/Toolbar'
 import { LatexEditor } from '@/components/Editor'
 import { PDFViewer } from '@/components/PDFViewer'
+import { StatusBar } from '@/components/StatusBar'
+import { useAutoCompile } from '@/hooks/useAutoCompile'
 
 export default function App() {
+  // Enable auto-compile with 2 second delay
+  useAutoCompile(2000)
+  
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white">
       <Toolbar />
@@ -19,6 +24,8 @@ export default function App() {
           <PDFViewer />
         </Panel>
       </PanelGroup>
+      
+      <StatusBar />
     </div>
   )
 }
