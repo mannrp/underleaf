@@ -1,5 +1,6 @@
-import { FolderOpen, Save, Play, Zap, ZapOff } from 'lucide-react'
+import { FolderOpen, Save, Play, Zap, ZapOff, Settings } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { useSettingsPanel } from '@/hooks/useSettingsPanel'
 
 export function Toolbar() {
   const { 
@@ -15,6 +16,8 @@ export function Toolbar() {
     setAutoCompileEnabled,
     updatePdfTime
   } = useEditorStore()
+  
+  const { openSettings } = useSettingsPanel()
   
   const handleOpen = async () => {
     const result = await window.electron.fileOpen()
@@ -97,6 +100,15 @@ export function Toolbar() {
         Auto
       </button>
       <div className="flex-1" />
+      <button 
+        onClick={openSettings}
+        className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded flex items-center gap-2 text-white"
+        title="Open Settings (Ctrl+,)"
+      >
+        <Settings size={16} />
+        Settings
+      </button>
+      <div className="w-px h-6 bg-gray-700 mx-2" />
       <span className="text-sm text-gray-400">
         {filePath ? filePath : 'Untitled'}
       </span>

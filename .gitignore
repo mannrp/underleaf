@@ -107,3 +107,6 @@ temp/
 *.nav
 *.snm
 *.vrb
+
+# Feature planning and ideas
+feature-ideas.md

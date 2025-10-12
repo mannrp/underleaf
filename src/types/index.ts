@@ -13,6 +13,13 @@ export interface CompilationResult {
   logs: string
 }
 
+// Re-export environment types for easy access
+export type { 
+  EnvironmentInfo, 
+  StorageAdapter, 
+  EnvironmentAdapter 
+} from '../utils/environment'
+
 declare global {
   interface Window {
     electron: ElectronAPI

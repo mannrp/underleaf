@@ -8,11 +8,204 @@
   box-sizing: border-box;
 }
 
+/* CSS Custom Properties for Theme System */
+:root {
+  /* Default theme (dark) - will be overridden by theme system */
+  --color-background: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-tertiary: #334155;
+  
+  --color-surface: #1e293b;
+  --color-surface-secondary: #334155;
+  --color-surface-hover: #475569;
+  
+  --color-text: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #0f172a;
+  
+  --color-border: #334155;
+  --color-border-secondary: #475569;
+  --color-border-focus: #60a5fa;
+  
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-secondary: #94a3b8;
+  --color-secondary-hover: #cbd5e1;
+  --color-accent: #a78bfa;
+  --color-accent-hover: #8b5cf6;
+  
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+  --color-info: #22d3ee;
+  
+  --color-editor-background: #0f172a;
+  --color-editor-gutter: #1e293b;
+  --color-editor-selection: #1e40af;
+  --color-editor-cursor: #60a5fa;
+  --color-editor-line-highlight: #1e293b;
+  
+  --syntax-command: #f87171;
+  --syntax-environment: #34d399;
+  --syntax-math: #a78bfa;
+  --syntax-comment: #9ca3af;
+  --syntax-string: #22d3ee;
+  --syntax-keyword: #f87171;
+  --syntax-number: #fb923c;
+  --syntax-operator: #d1d5db;
+  --syntax-bracket: #9ca3af;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow: hidden;
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 #root {
   height: 100vh;
+}
+
+/* Theme transition animations */
+.theme-transitioning,
+.theme-transitioning * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Custom animations for settings panel */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Theme-aware scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-secondary, #f1f5f9);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary, #cbd5e1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted, #64748b);
+}
+
+/* Theme-aware selection */
+::selection {
+  background: var(--color-primary, #3b82f6);
+  color: var(--color-text-inverse, #ffffff);
+}
+
+/* Tailwind scrollbar utilities */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-gray-600 {
+  scrollbar-color: #4b5563 transparent;
+}
+
+.scrollbar-track-gray-800 {
+  scrollbar-color: #4b5563 #1f2937;
+}
+
+/* Webkit scrollbar for settings panel */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thumb-gray-600::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+  border-radius: 3px;
+}
+
+.scrollbar-thumb-gray-600::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}
+
+.scrollbar-track-gray-800::-webkit-scrollbar-track {
+  background-color: #1f2937;
+}
+
+/* Settings panel layout improvements */
+.settings-panel-modal {
+  /* Ensure proper flexbox behavior across browsers */
+  display: flex !important;
+  flex-direction: column !important;
+  
+  /* Prevent content from overflowing */
+  overflow: hidden !important;
+  
+  /* Ensure minimum height for usability */
+  min-height: 600px !important;
+  
+  /* Responsive height constraints */
+  height: 85vh !important;
+  max-height: 90vh !important;
+}
+
+/* Ensure footer buttons are always accessible */
+.settings-panel-footer {
+  /* Prevent footer from shrinking */
+  flex-shrink: 0 !important;
+  
+  /* Ensure minimum height for button accessibility */
+  min-height: 80px !important;
+  
+  /* Ensure buttons have proper click targets */
+  padding: 1.5rem !important;
+}
+
+.settings-panel-footer button {
+  /* Ensure buttons meet accessibility guidelines */
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* Ensure content area scrolls properly */
+.settings-panel-content {
+  /* Allow content to grow and shrink */
+  flex: 1 1 0% !important;
+  
+  /* Prevent content from overflowing */
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-height: 700px) {
+  .settings-panel-modal {
+    height: 95vh !important;
+    max-height: 95vh !important;
+    min-height: 500px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-panel-modal {
+    margin: 1rem !important;
+    width: calc(100% - 2rem) !important;
+    height: calc(100vh - 2rem) !important;
+    max-height: calc(100vh - 2rem) !important;
+  }
 }

@@ -10,4 +10,6 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.invoke('latex:compile', path),
   pdfRead: (path: string) => 
     ipcRenderer.invoke('pdf:read', path),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  saveSettings: (settings: any) => ipcRenderer.invoke('settings:save', settings),
 })

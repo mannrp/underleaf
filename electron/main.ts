@@ -3,6 +3,8 @@ import { spawn } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs'
 
+const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json')
+
 let mainWindow: BrowserWindow | null = null
 
 function createWindow() {
@@ -36,6 +38,28 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
+  }
+})
+
+// IPC Handlers for settings
+ipcMain.handle('settings:get', async () => {
+  try {
+    if (fs.existsSync(SETTINGS_PATH)) {
+      const settings = fs.readFileSync(SETTINGS_PATH, 'utf-8')
+      return JSON.parse(settings)
+    }
+    return null
+  } catch (error) {
+    console.error('Failed to get settings:', error)
+    return null
+  }
+})
+
+ipcMain.handle('settings:save', async (_, settings) => {
+  try {
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2))
+  } catch (error) {
+    console.error('Failed to save settings:', error)
   }
 })
 
