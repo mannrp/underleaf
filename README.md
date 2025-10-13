@@ -22,7 +22,9 @@ Install a LaTeX distribution:
 ## Installation
 
 ### Download Release
-Coming soon - releases will be available at [Releases](https://github.com/mannrp/underleaf/releases)
+[Release 1 - Windows x64](https://github.com/mannrp/underleaf/releases/download/v0.1.0/UnderleafSetup.exe)
+
+More releases coming soon - releases will be available at [Releases](https://github.com/mannrp/underleaf/releases)
 
 ### Build from Source
 ```bash
