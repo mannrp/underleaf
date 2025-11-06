@@ -1,7 +1,17 @@
-import { FolderOpen, Save, Play, Zap, ZapOff } from 'lucide-react'
+import { useState } from 'react'
+import { FolderOpen, Save, Play, Zap, ZapOff, Settings as SettingsIcon, PanelRightOpen } from 'lucide-react'
 import { useEditorStore } from '@/stores/editorStore'
+import { useThemeStore } from '@/stores/themeStore'
+import { Button } from '@/components/ui/button'
+import { Settings } from '@/components/Settings'
+import { toast } from '@/components/ui/toast'
+import { cn } from '@/lib/utils'
 
-export function Toolbar() {
+interface ToolbarProps {
+  onToggleSidebar?: () => void
+}
+
+export function Toolbar({ onToggleSidebar }: ToolbarProps) {
   const { 
     filePath, 
     content, 
@@ -16,26 +26,52 @@ export function Toolbar() {
     updatePdfTime
   } = useEditorStore()
   
+  const { glassEffectEnabled, theme } = useThemeStore()
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  
+  const isElectron = typeof window !== 'undefined' && window.electron
+  
   const handleOpen = async () => {
+    if (!isElectron) {
+      toast.warning('File operations are only available in the desktop app')
+      return
+    }
     const result = await window.electron.fileOpen()
     if (result) {
       setContent(result.content)
       setFilePath(result.path)
+      toast.success('File opened successfully')
     }
   }
   
   const handleSave = async () => {
-    if (filePath) {
-      await window.electron.fileSave(filePath, content)
-    } else {
-      const newPath = await window.electron.fileSaveAs(content)
-      if (newPath) setFilePath(newPath)
+    if (!isElectron) {
+      toast.warning('File operations are only available in the desktop app')
+      return
+    }
+    try {
+      if (filePath) {
+        await window.electron.fileSave(filePath, content)
+        toast.success('File saved successfully')
+      } else {
+        const newPath = await window.electron.fileSaveAs(content)
+        if (newPath) {
+          setFilePath(newPath)
+          toast.success('File saved successfully')
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to save file')
     }
   }
   
   const handleCompile = async () => {
+    if (!isElectron) {
+      toast.warning('LaTeX compilation is only available in the desktop app')
+      return
+    }
     if (!filePath) {
-      alert('Please save the file first')
+      toast.warning('Please save the file first')
       return
     }
     
@@ -51,55 +87,77 @@ export function Toolbar() {
         setPdfPath(result.pdfPath)
         updatePdfTime() // Force PDF refresh
         console.log('Compilation successful:', result.pdfPath)
+        toast.success('Compilation successful!')
       } else {
         console.error('Compilation failed:', result.output)
         console.error('Logs:', result.logs)
-        alert(`Compilation failed. Check console for details.\n\nError: ${result.output.slice(0, 200)}...`)
+        toast.error('Compilation failed. Check console for details.')
       }
     } catch (error) {
       console.error('Compilation error:', error)
-      alert('Compilation error: ' + error)
+      toast.error('Compilation error: ' + error)
     } finally {
       setIsCompiling(false)
     }
   }
   
+  const glassClasses = glassEffectEnabled && theme.glass.enabled
+    ? "backdrop-blur-glass bg-opacity-glass"
+    : ""
+  
   return (
-    <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center px-4 gap-2">
-      <button onClick={handleOpen} className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded flex items-center gap-2 text-white">
-        <FolderOpen size={16} />
+    <div className={cn(
+      "h-12 bg-bg-secondary border-b border-border flex items-center px-4 gap-2",
+      glassClasses
+    )}>
+      <Button onClick={handleOpen} variant="secondary" size="sm" icon={<FolderOpen size={16} />}>
         Open
-      </button>
-      <button onClick={handleSave} className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded flex items-center gap-2 text-white">
-        <Save size={16} />
+      </Button>
+      <Button onClick={handleSave} variant="secondary" size="sm" icon={<Save size={16} />}>
         Save
-      </button>
-      <div className="w-px h-6 bg-gray-700 mx-2" />
-      <button 
+      </Button>
+      <div className="w-px h-6 bg-border mx-2" />
+      <Button 
         onClick={handleCompile} 
         disabled={isCompiling}
-        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed rounded flex items-center gap-2 text-white"
+        loading={isCompiling}
+        variant="primary"
+        size="sm"
+        icon={<Play size={16} />}
       >
-        <Play size={16} />
         {isCompiling ? 'Compiling...' : 'Compile'}
-      </button>
-      <div className="w-px h-6 bg-gray-700 mx-2" />
-      <button 
+      </Button>
+      <div className="w-px h-6 bg-border mx-2" />
+      <Button 
         onClick={() => setAutoCompileEnabled(!autoCompileEnabled)}
-        className={`px-3 py-1.5 rounded flex items-center gap-2 text-white ${
-          autoCompileEnabled 
-            ? 'bg-green-600 hover:bg-green-500' 
-            : 'bg-gray-700 hover:bg-gray-600'
-        }`}
+        variant={autoCompileEnabled ? "primary" : "secondary"}
+        size="sm"
+        icon={autoCompileEnabled ? <Zap size={16} /> : <ZapOff size={16} />}
         title={autoCompileEnabled ? 'Disable auto-compile' : 'Enable auto-compile'}
+        className={autoCompileEnabled ? "bg-accent-success hover:brightness-110" : ""}
       >
-        {autoCompileEnabled ? <Zap size={16} /> : <ZapOff size={16} />}
         Auto
-      </button>
+      </Button>
       <div className="flex-1" />
-      <span className="text-sm text-gray-400">
+      <span className="text-sm text-text-secondary">
         {filePath ? filePath : 'Untitled'}
       </span>
+      <div className="w-px h-6 bg-border mx-2" />
+      <Button
+        onClick={onToggleSidebar}
+        variant="ghost"
+        size="icon"
+        icon={<PanelRightOpen size={18} />}
+        title="Toggle AI Panel"
+      />
+      <Button
+        onClick={() => setSettingsOpen(true)}
+        variant="ghost"
+        size="icon"
+        icon={<SettingsIcon size={18} />}
+        title="Settings"
+      />
+      <Settings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   )
 }

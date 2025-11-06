@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useEditorStore } from '@/stores/editorStore'
+import { useThemeStore } from '@/stores/themeStore'
+import { cn } from '@/lib/utils'
 
 export function PDFViewer() {
   const { pdfPath, pdfUpdateTime } = useEditorStore()
+  const { glassEffectEnabled, theme } = useThemeStore()
   const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -36,9 +39,13 @@ export function PDFViewer() {
     loadPdf()
   }, [pdfPath, pdfUpdateTime])
   
+  const glassClasses = glassEffectEnabled && theme.glass.enabled
+    ? "backdrop-blur-glass bg-opacity-glass"
+    : ""
+  
   if (!pdfPath) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-900 text-gray-400">
+      <div className={cn("flex items-center justify-center h-full bg-bg-primary text-text-secondary", glassClasses)}>
         <div className="text-center">
           <p className="text-lg">No PDF compiled yet</p>
           <p className="text-sm mt-2">Save and compile to see preview</p>
@@ -49,7 +56,7 @@ export function PDFViewer() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-900 text-gray-400">
+      <div className={cn("flex items-center justify-center h-full bg-bg-primary text-text-secondary", glassClasses)}>
         <div className="text-center">
           <p className="text-lg">Loading PDF...</p>
         </div>
@@ -59,11 +66,11 @@ export function PDFViewer() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-900 text-gray-400">
+      <div className={cn("flex items-center justify-center h-full bg-bg-primary text-text-secondary", glassClasses)}>
         <div className="text-center">
-          <p className="text-lg text-red-400">Error loading PDF</p>
+          <p className="text-lg text-accent-error">Error loading PDF</p>
           <p className="text-sm mt-2">{error}</p>
-          <p className="text-xs mt-2 text-gray-500">Path: {pdfPath}</p>
+          <p className="text-xs mt-2 text-text-tertiary">Path: {pdfPath}</p>
         </div>
       </div>
     )
@@ -71,7 +78,7 @@ export function PDFViewer() {
 
   if (!pdfDataUrl) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-900 text-gray-400">
+      <div className={cn("flex items-center justify-center h-full bg-bg-primary text-text-secondary", glassClasses)}>
         <div className="text-center">
           <p className="text-lg">No PDF data</p>
         </div>
@@ -80,7 +87,7 @@ export function PDFViewer() {
   }
   
   return (
-    <div className="h-full bg-gray-900">
+    <div className="h-full bg-bg-primary">
       <iframe
         key={pdfUpdateTime} // Force re-render when PDF updates
         src={pdfDataUrl}

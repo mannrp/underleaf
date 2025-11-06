@@ -1,0 +1,31 @@
+# Git Commands to Push Changes
+
+# 1. Check current status
+git status
+
+# 2. Add all changes
+git add .
+
+# 3. Commit with the message (you can edit COMMIT_MESSAGE.md first if needed)
+git commit -F COMMIT_MESSAGE.md
+
+# 4. Push to remote (replace 'main' with your branch name if different)
+git push origin main
+
+# Alternative: If you want a shorter commit message, use this instead of step 3:
+git commit -m "feat: Complete UI redesign with theme system and AI infrastructure
+
+- Implemented complete theme system (dark/light/glassy)
+- Rebuilt all UI components with shadcn/ui + Framer Motion
+- Added settings panel with LLM configuration
+- Integrated Monaco editor themes
+- Added LLM service infrastructure (Gemini/OpenAI/Anthropic/Ollama)
+- Implemented OCR pipeline (preliminary/placeholder)
+- Added toast notifications and error handling
+- Fixed z-index issues and theme syncing bugs
+- Lazy loading for AI features
+
+Note: OCR feature is preliminary and will be enhanced in future versions"
+
+# 5. Verify push
+git log --oneline -1
