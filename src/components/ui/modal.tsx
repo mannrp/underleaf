@@ -55,13 +55,13 @@ export function Modal({ isOpen, onClose, title, children, size = "md", className
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              "bg-bg-secondary border border-border w-full",
+              "bg-bg-secondary border border-border w-full max-h-[90vh] flex flex-col",
               sizeClasses[size],
               glassClasses,
               className
             )}
           >
-            <div className="flex items-center justify-between p-4 border-b border-border">
+            <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
               <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -73,7 +73,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md", className
                 <X size={20} className="text-text-secondary" />
               </motion.button>
             </div>
-            <div className="p-4">{children}</div>
+            <div className="p-4 overflow-y-auto flex-1">{children}</div>
           </motion.div>
         </motion.div>
       )}

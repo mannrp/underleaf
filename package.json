@@ -39,7 +39,6 @@
     "react-resizable-panels": "^2.1.4",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "tesseract.js": "^6.0.1",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
@@ -80,6 +79,7 @@
       "node_modules/**/*",
       "package.json"
     ],
+
     "extraMetadata": {
       "main": "dist-electron/electron/main.cjs"
     },

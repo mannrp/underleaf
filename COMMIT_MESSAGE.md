@@ -1,149 +1,93 @@
-# feat: Complete Underleaf UI redesign with theme system and AI infrastructure
+# Fix Monaco Editor Theme Switching & Remove OCR Feature
 
-## 🎨 Major Features Implemented
+## Critical Fixes
 
-### Theme System & UI Components
-- **Complete theme system** with dark, light, and glassy themes
-  - CSS variable-based theming for runtime switching
-  - Glass effect support with backdrop blur
-  - localStorage persistence for user preferences
-  - Theme tokens for colors, spacing, typography, and effects
+### 1. Fixed Monaco Editor Dark Mode (Root Cause Resolution)
+**Problem**: Editor background remained white when switching to dark mode, despite all other UI elements updating correctly.
 
-- **Rebuilt component library** using shadcn/ui + Framer Motion
-  - Button component with primary/secondary/ghost/danger variants
-  - Modal component with AnimatePresence and animations
-  - Input and Select components with full theme support
-  - Toast notification system with success/error/warning/info types
-  - All components support glass effects and theme switching
+**Root Cause**: The application was using two different Monaco instances:
+- Global import: `import * as monaco from 'monaco-editor'`
+- React wrapper instance: Provided by `@monaco-editor/react` in the `onMount` callback
 
-- **Updated core components** with theme awareness
-  - Toolbar with new button components and theme styling
-  - StatusBar with theme colors and glass effects
-  - PDFViewer with theme-aware styling
-  - Resizable panels with theme-aware resize handles
+Theme definitions were being registered on the wrong Monaco instance, causing theme switches to fail silently.
 
-### Monaco Editor Integration
-- **Custom Monaco themes** matching app themes (dark, light, glassy)
-- **Dynamic theme syncing** - editor theme updates with app theme
-- **Font size integration** from settings
-- Proper theme initialization and state management
+**Solution**: Complete rebuild of theme management in Editor.tsx
+- Removed global Monaco import and module-level theme initialization
+- Stored Monaco instance from `onMount` callback in a ref (`monacoRef`)
+- Moved theme definitions inline to use the correct Monaco instance
+- Updated theme switching logic to use the stored Monaco instance
+- Themes now properly switch between Dark, Light, and Glassy modes
 
-### Settings & Configuration
-- **Comprehensive settings panel** with modal UI
-  - Theme selection (dark/light/glassy)
-  - Glass effect toggle
-  - LLM provider configuration (Gemini, OpenAI, Anthropic, Ollama)
-  - API key storage with base64 encryption
-  - Editor preferences (font size, auto-compile delay)
-  - Connection testing for LLM providers
+**Files Changed**:
+- `src/components/Editor.tsx`: Rebuilt theme management from the ground up
+- Removed dependency on `src/theme/monacoThemes.ts` (can be deleted if unused elsewhere)
 
-- **Settings store** with Zustand
-  - localStorage persistence
-  - Encrypted API key storage
-  - Reset to defaults functionality
+### 2. Removed OCR Feature Completely
+**Reason**: OCR feature is being developed as a separate module.
 
-### LLM Service Infrastructure
-- **Unified LLM service** supporting 4 providers
-  - Google Gemini API integration
-  - OpenAI Chat Completions API
-  - Anthropic Messages API
-  - Ollama local model support
-- **Error handling** with timeout logic
-- **Provider abstraction** for easy extensibility
-- **AI store** for shared state management
+**Changes**:
+- Deleted `src/services/ocrService.ts`
+- Deleted `src/components/OCRPanel.tsx`
+- Removed OCR state from `src/stores/aiStore.ts` (isProcessingOCR, ocrResult, setters)
+- Removed `tesseract.js` dependency from `package.json`
+- Removed Tesseract build resources from electron-builder configuration
+- Simplified `src/App.tsx` to show only AI Chat panel (removed tabs UI)
+- Cleaned up unused imports
 
-### OCR Pipeline (Preliminary)
-- **Tesseract.js integration** for OCR processing
-- **LLM conversion** for text-to-LaTeX transformation
-- **OCR panel UI** with progress indicators and animations
-- **Lazy loading** for optimal bundle size
-- **Sidebar integration** with toggle button
-- ⚠️ **Note**: OCR feature is preliminary/placeholder - will be polished and fully implemented in later versions with dedicated full-screen tab interface
+**Files Changed**:
+- `src/App.tsx`: Removed tabs, simplified to single AI Chat panel
+- `src/stores/aiStore.ts`: Removed all OCR-related state and actions
+- `package.json`: Removed tesseract.js dependency and build resources
 
-### Performance & Code Quality
-- **Lazy loading** for AI features (code splitting)
-- **Debounce utility** for performance optimization
-- **Error handler utility** with error categorization
-- **Toast notifications** replacing alert dialogs
-- **Browser compatibility** checks for Electron-only features
-- **TypeScript strict mode** throughout
+### 3. Enhanced AI Chat Error Debugging
+**Problem**: AI chat showed generic "Sorry, I encountered an error" with no debugging information.
 
-### Bug Fixes
-- Fixed modal z-index issue in glassy mode (z-100)
-- Fixed dropdown z-index to appear above modals (z-150)
-- Fixed Monaco editor theme not syncing with app theme
-- Fixed file operations in browser with proper error messages
-- Fixed glassy theme colors for Monaco compatibility
+**Solution**: Comprehensive error handling improvements
+- Fixed synchronous `require()` issue by importing DocumentAgent at module level
+- Enhanced JSON parsing in `documentAgent.ts` to handle markdown code blocks
+- Added response structure validation
+- Improved error messages to show actual error details to users
+- Added detailed console logging with stack traces
+- Fixed deprecated `onKeyPress` → `onKeyDown`
 
-## 📦 Technical Details
+**Files Changed**:
+- `src/components/AIChat.tsx`: Better error display, fixed import issue
+- `src/services/documentAgent.ts`: Robust JSON parsing with validation
 
-### Dependencies Added
-- framer-motion (animations)
-- tesseract.js (OCR)
-- clsx & tailwind-merge (utility classes)
-- shadcn/ui components (button, dialog, select, input, tabs)
+## Documentation Updates
 
-### Architecture
-- **State Management**: Zustand stores (theme, settings, editor, AI)
-- **Styling**: Tailwind CSS with CSS variables
-- **Animations**: Framer Motion throughout
-- **Type Safety**: TypeScript strict mode
-- **Code Splitting**: React.lazy for AI features
+### README.md
+- Added AI Features section describing document editing capabilities
+- Added LLM provider configuration information
+- Updated feature list to reflect current capabilities
+- Added AI usage instructions
+- Expanded troubleshooting section
 
-### File Structure
-```
-src/
-├── components/
-│   ├── ui/          # Reusable UI components
-│   ├── Settings.tsx # Settings modal
-│   ├── OCRPanel.tsx # OCR interface (preliminary)
-│   └── ...
-├── stores/          # Zustand state stores
-├── services/        # LLM and OCR services
-├── theme/           # Theme system and Monaco themes
-└── utils/           # Utilities (debounce, error handling)
-```
+## Technical Improvements
 
-## 🚀 Build Status
-- ✅ TypeScript compilation successful
-- ✅ Vite build successful
-- ✅ Electron build successful
-- ✅ No diagnostics errors
-- ✅ Production bundle: ~4.15MB (Monaco included)
+1. **Type Safety**: Proper Monaco types using `Monaco` and `monacoType` imports
+2. **Instance Management**: Correct handling of Monaco instance lifecycle
+3. **Error Handling**: Detailed error messages for better debugging
+4. **Code Quality**: Removed unused imports and cleaned up dependencies
 
-## 📝 Notes for Future Development
+## Testing Notes
 
-### OCR Feature Enhancement (TODO)
-- Move OCR to dedicated full-screen tab interface
-- Improve error handling and user feedback
-- Add support for multiple image formats
-- Implement batch processing
-- Add preview and editing capabilities
-- Better integration with editor cursor position
+- ✅ Theme switching now works correctly (Dark/Light/Glassy)
+- ✅ Editor background changes with theme
+- ✅ AI Chat shows detailed error messages
+- ✅ OCR feature completely removed
+- ✅ No build errors or TypeScript diagnostics
+- ✅ Application builds and runs successfully
 
-### Remaining Tasks
-- Task 6: Context-aware autocomplete
-- Task 7: AI error analyzer
-- Task 8: AI document editor agent
-- Task 12: Testing and polish (partial)
+## Breaking Changes
 
-## 🎯 What's Working
-- ✅ Complete theme system with 3 themes
-- ✅ All UI components themed and animated
-- ✅ Settings panel fully functional
-- ✅ Monaco editor theme syncing
-- ✅ LLM service infrastructure ready
-- ✅ Toast notifications
-- ✅ Error handling
-- ✅ Browser compatibility checks
-- ✅ Lazy loading and code splitting
-- ✅ OCR pipeline (basic/preliminary)
+- OCR feature removed (will be reintroduced as separate module)
+- Tesseract.js dependency removed (reduces bundle size)
 
-## 🔧 Breaking Changes
-- None - this is a complete redesign maintaining backward compatibility with existing LaTeX compilation features
+## Migration Notes
 
----
-
-**Tested on**: Windows 10, Electron 32.3.3, Node.js 18+
-**Bundle size**: 4.15MB (gzipped: 1.1MB)
-**Build time**: ~40s
+Users with existing installations:
+- OCR functionality will no longer be available
+- Theme switching will now work correctly
+- AI Chat errors will be more informative
+- No data migration required

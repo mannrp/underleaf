@@ -5,18 +5,23 @@ import { LatexEditor } from '@/components/Editor'
 import { PDFViewer } from '@/components/PDFViewer'
 import { StatusBar } from '@/components/StatusBar'
 import { ToastContainer } from '@/components/ui/toast'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAutoCompile } from '@/hooks/useAutoCompile'
+import { useEditorStore } from '@/stores/editorStore'
 import { Loader2 } from 'lucide-react'
 
 // Lazy load AI features
-const OCRPanel = lazy(() => import('@/components/OCRPanel').then(m => ({ default: m.OCRPanel })))
+const ErrorPanel = lazy(() => import('@/components/ErrorPanel').then(m => ({ default: m.ErrorPanel })))
+const AIChat = lazy(() => import('@/components/AIChat').then(m => ({ default: m.AIChat })))
 
 export default function App() {
   // Enable auto-compile with 2 second delay
   useAutoCompile(2000)
   
   const [showSidebar, setShowSidebar] = useState(false)
+  const { compilationResult } = useEditorStore()
+  
+  // Show error panel when compilation fails
+  const hasErrors = compilationResult && !compilationResult.success
   
   return (
     <div className="h-screen flex flex-col bg-bg-primary text-text-primary">
@@ -24,7 +29,19 @@ export default function App() {
       
       <PanelGroup direction="horizontal" className="flex-1">
         <Panel defaultSize={50} minSize={30}>
-          <LatexEditor />
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-hidden">
+              <LatexEditor />
+            </div>
+            {hasErrors && (
+              <Suspense fallback={null}>
+                <ErrorPanel
+                  errorLog={compilationResult.logs || null}
+                  onClose={() => {}}
+                />
+              </Suspense>
+            )}
+          </div>
         </Panel>
         
         <PanelResizeHandle className="w-1 bg-border hover:bg-accent-primary transition-colors" />
@@ -38,22 +55,15 @@ export default function App() {
             <PanelResizeHandle className="w-1 bg-border hover:bg-accent-primary transition-colors" />
             <Panel defaultSize={25} minSize={20} maxSize={40}>
               <div className="h-full bg-bg-secondary border-l border-border">
-                <Tabs defaultValue="ocr" className="h-full flex flex-col">
-                  <TabsList className="w-full justify-start border-b border-border bg-bg-secondary">
-                    <TabsTrigger value="ocr">OCR</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="ocr" className="flex-1 overflow-hidden">
-                    <Suspense
-                      fallback={
-                        <div className="flex items-center justify-center h-full">
-                          <Loader2 className="animate-spin text-accent-primary" size={32} />
-                        </div>
-                      }
-                    >
-                      <OCRPanel />
-                    </Suspense>
-                  </TabsContent>
-                </Tabs>
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center h-full">
+                      <Loader2 className="animate-spin text-accent-primary" size={32} />
+                    </div>
+                  }
+                >
+                  <AIChat />
+                </Suspense>
               </div>
             </Panel>
           </>

@@ -10,7 +10,7 @@ export interface ErrorAnalysisResult {
   message: string
   line: number | null
   explanation: string
-  fix?: string
+  fix: string | null
 }
 
 export interface ErrorAnalysis {
@@ -19,10 +19,6 @@ export interface ErrorAnalysis {
 }
 
 interface AIState {
-  // OCR state
-  isProcessingOCR: boolean
-  ocrResult: string | null
-  
   // Chat state
   chatHistory: ChatMessage[]
   isChatProcessing: boolean
@@ -32,22 +28,16 @@ interface AIState {
   isAnalyzingErrors: boolean
   
   // Actions
-  setProcessingOCR: (processing: boolean) => void
-  setOCRResult: (result: string | null) => void
-  
   addChatMessage: (message: ChatMessage) => void
   setChatProcessing: (processing: boolean) => void
   clearChatHistory: () => void
   
   setErrorAnalysis: (analysis: ErrorAnalysis | null) => void
   setAnalyzingErrors: (analyzing: boolean) => void
+  analyzeError: (errorLog: string, sourceCode: string) => Promise<void>
 }
 
 export const useAIStore = create<AIState>((set) => ({
-  // OCR state
-  isProcessingOCR: false,
-  ocrResult: null,
-  
   // Chat state
   chatHistory: [],
   isChatProcessing: false,
@@ -57,9 +47,6 @@ export const useAIStore = create<AIState>((set) => ({
   isAnalyzingErrors: false,
   
   // Actions
-  setProcessingOCR: (processing: boolean) => set({ isProcessingOCR: processing }),
-  setOCRResult: (result: string | null) => set({ ocrResult: result }),
-  
   addChatMessage: (message: ChatMessage) =>
     set((state) => ({
       chatHistory: [...state.chatHistory, message],
@@ -69,4 +56,32 @@ export const useAIStore = create<AIState>((set) => ({
   
   setErrorAnalysis: (analysis: ErrorAnalysis | null) => set({ errorAnalysis: analysis }),
   setAnalyzingErrors: (analyzing: boolean) => set({ isAnalyzingErrors: analyzing }),
+  
+  analyzeError: async (errorLog: string, sourceCode: string) => {
+    set({ isAnalyzingErrors: true, errorAnalysis: null })
+    
+    try {
+      const { useSettingsStore } = await import('./settingsStore')
+      const { LLMService } = await import('@/services/llmService')
+      const { ErrorAnalyzer } = await import('@/services/errorAnalyzer')
+      
+      const settings = useSettingsStore.getState()
+      const llmService = new LLMService(
+        settings.llmProvider,
+        settings.llmApiKey,
+        settings.llmModel,
+        settings.llmBaseUrl
+      )
+      
+      const analyzer = new ErrorAnalyzer(llmService)
+      const analysis = await analyzer.analyzeError(errorLog, sourceCode)
+      
+      set({ errorAnalysis: analysis })
+    } catch (error) {
+      console.error('Error analyzing errors:', error)
+      set({ errorAnalysis: null })
+    } finally {
+      set({ isAnalyzingErrors: false })
+    }
+  },
 }))
