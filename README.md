@@ -1,7 +1,7 @@
 # Underleaf
 
-A beautiful local LaTeX editor with live PDF preview and AI-powered editing. Built with Electron, React, and TypeScript.
-
+An almost entirely vibe-coded local LaTeX editor with live PDF preview and AI-powered editing. Built with Electron, React, and TypeScript.
+This was mostly to learn Electron wrapping, testing out Kiro and shipping an executeable.
 ## Features
 
 ### Core Editor
